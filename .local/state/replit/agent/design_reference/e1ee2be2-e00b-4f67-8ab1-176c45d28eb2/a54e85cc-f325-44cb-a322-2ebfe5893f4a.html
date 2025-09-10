@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Community Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(0 0% 100%);
+            --foreground: hsl(222 84% 5%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222 84% 5%);
+            --primary: hsl(142 76% 36%);
+            --primary-foreground: hsl(0 0% 98%);
+            --secondary: hsl(84 81% 44%);
+            --secondary-foreground: hsl(222 84% 5%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215 25% 40%);
+            --accent: hsl(142 86% 28%);
+            --accent-foreground: hsl(0 0% 98%);
+            --border: hsl(214 32% 91%);
+            --input: hsl(214 32% 91%);
+            --ring: hsl(142 76% 36%);
+            --radius: 0.75rem;
+        }
+        
+        .dark {
+            --background: hsl(222 84% 5%);
+            --foreground: hsl(210 40% 98%);
+            --card: hsl(222 84% 8%);
+            --card-foreground: hsl(210 40% 98%);
+            --primary: hsl(142 76% 36%);
+            --primary-foreground: hsl(222 84% 5%);
+            --secondary: hsl(217 33% 17%);
+            --secondary-foreground: hsl(210 40% 98%);
+            --muted: hsl(217 33% 17%);
+            --muted-foreground: hsl(215 20% 65%);
+            --accent: hsl(217 33% 17%);
+            --accent-foreground: hsl(210 40% 98%);
+            --border: hsl(217 33% 17%);
+            --input: hsl(217 33% 17%);
+            --ring: hsl(142 76% 36%);
+        }
+
+        .folder-card {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .folder-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .pdf-page {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .pdf-page:hover {
+            transform: scale(1.02);
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .role-student { background-color: hsl(220 91% 93%); color: hsl(220 91% 40%); }
+        .role-teacher { background-color: hsl(142 76% 90%); color: hsl(142 76% 30%); }
+        .role-admin { background-color: hsl(0 84% 93%); color: hsl(0 84% 40%); }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="bg-card border-b border-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">
+                            <i class="fas fa-graduation-cap mr-2"></i>
+                            UniPortal
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="role-badge role-teacher" data-mock="true">
+                        <i class="fas fa-chalkboard-teacher mr-1"></i>
+                        Teacher
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150" alt="User avatar" data-mock="true">
+                        <span class="text-sm font-medium" data-bind="user.name" data-mock="true">Prof. Ahmed Benali</span>
+                        <button class="text-muted-foreground hover:text-foreground">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-card border-r border-border">
+            <div class="p-6">
+                <nav class="space-y-2">
+                    <a href="#dashboard" class="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground">
+                        <i class="fas fa-home mr-3"></i>
+                        Dashboard
+                    </a>
+                    <a href="#browse" class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
+                        <i class="fas fa-folder-open mr-3"></i>
+                        Browse Categories
+                    </a>
+                    <!-- Teacher-specific menu items -->
+                    <a href="#my-content" class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
+                        <i class="fas fa-upload mr-3"></i>
+                        My Content
+                    </a>
+                    <a href="#upload" class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
+                        <i class="fas fa-plus-circle mr-3"></i>
+                        Upload Lesson
+                    </a>
+                    <!-- Would be hidden for students, shown for admins -->
+                    <div class="pt-4 border-t border-border">
+                        <p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Administration</p>
+                        <a href="#manage-categories" class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
+                            <i class="fas fa-cogs mr-3"></i>
+                            Manage Categories
+                        </a>
+                        <a href="#user-management" class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
+                            <i class="fas fa-users mr-3"></i>
+                            User Management
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="p-6">
+                <!-- Breadcrumb Navigation -->
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <i class="fas fa-home text-muted-foreground"></i>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <span class="text-sm font-medium text-muted-foreground">Dashboard</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-primary/10 rounded-lg">
+                                <i class="fas fa-book text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">Total Lessons</p>
+                                <p class="text-2xl font-bold text-foreground" data-mock="true">247</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-secondary/10 rounded-lg">
+                                <i class="fas fa-tasks text-secondary text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">Exercises</p>
+                                <p class="text-2xl font-bold text-foreground" data-mock="true">156</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-accent/10 rounded-lg">
+                                <i class="fas fa-graduation-cap text-accent text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">Active Students</p>
+                                <p class="text-2xl font-bold text-foreground" data-mock="true">1,234</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-primary/10 rounded-lg">
+                                <i class="fas fa-download text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">Downloads Today</p>
+                                <p class="text-2xl font-bold text-foreground" data-mock="true">89</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Browse Categories Section -->
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-foreground">Browse by Location</h2>
+                        <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add New Category
+                        </button>
+                    </div>
+
+                    <!-- City Level Navigation -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- @MAP: cities.map(city => ( -->
+                        <div class="folder-card bg-muted p-4 rounded-lg border border-border cursor-pointer" data-event="click:navigateToCity">
+                            <div class="flex items-center mb-3">
+                                <div class="p-2 bg-primary/10 rounded-lg mr-3">
+                                    <i class="fas fa-city text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-foreground" data-bind="city.name" data-mock="true">Casablanca</h3>
+                                    <p class="text-sm text-muted-foreground" data-bind="city.schoolCount" data-mock="true">8 schools</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-muted-foreground" data-bind="city.lessonCount" data-mock="true">124 lessons</span>
+                                <i class="fas fa-chevron-right text-muted-foreground"></i>
+                            </div>
+                        </div>
+
+                        <div class="folder-card bg-muted p-4 rounded-lg border border-border cursor-pointer" data-event="click:navigateToCity">
+                            <div class="flex items-center mb-3">
+                                <div class="p-2 bg-primary/10 rounded-lg mr-3">
+                                    <i class="fas fa-city text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-foreground" data-mock="true">Rabat</h3>
+                                    <p class="text-sm text-muted-foreground" data-mock="true">5 schools</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-muted-foreground" data-mock="true">89 lessons</span>
+                                <i class="fas fa-chevron-right text-muted-foreground"></i>
+                            </div>
+                        </div>
+
+                        <div class="folder-card bg-muted p-4 rounded-lg border border-border cursor-pointer" data-event="click:navigateToCity">
+                            <div class="flex items-center mb-3">
+                                <div class="p-2 bg-primary/10 rounded-lg mr-3">
+                                    <i class="fas fa-city text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-foreground" data-mock="true">Marrakech</h3>
+                                    <p class="text-sm text-muted-foreground" data-mock="true">6 schools</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-muted-foreground" data-mock="true">67 lessons</span>
+                                <i class="fas fa-chevron-right text-muted-foreground"></i>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="mt-8 bg-card rounded-lg border border-border p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-6">Recent Activity</h2>
+                    <div class="space-y-4">
+                        <!-- @MAP: recentActivity.map(activity => ( -->
+                        <div class="flex items-center space-x-4 p-4 bg-muted rounded-lg">
+                            <div class="p-2 bg-primary/10 rounded-lg">
+                                <i class="fas fa-upload text-primary"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-foreground" data-mock="true">
+                                    <span data-bind="activity.teacherName">Prof. Sarah Martin</span> uploaded 
+                                    <span data-bind="activity.lessonTitle">"Advanced Calculus - Chapter 3"</span>
+                                </p>
+                                <p class="text-xs text-muted-foreground" data-bind="activity.timestamp" data-mock="true">2 hours ago</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full" data-mock="true">Mathematics</span>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-4 bg-muted rounded-lg">
+                            <div class="p-2 bg-secondary/10 rounded-lg">
+                                <i class="fas fa-user-plus text-secondary"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-foreground" data-mock="true">
+                                    <span data-bind="activity.studentCount">15 new students</span> joined 
+                                    <span data-bind="activity.courseName">Computer Science Program</span>
+                                </p>
+                                <p class="text-xs text-muted-foreground" data-mock="true">5 hours ago</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 bg-secondary/10 text-secondary rounded-full" data-mock="true">Registration</span>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- School Level View (Hidden by default) -->
+            <div id="school-view" class="p-6 hidden">
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="#dashboard" class="text-primary hover:text-primary/80">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#cities" class="text-primary hover:text-primary/80" data-mock="true">Casablanca</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <span class="text-sm font-medium text-muted-foreground">Schools</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-6">Schools in Casablanca</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="folder-card bg-muted p-4 rounded-lg border border-border cursor-pointer">
+                            <div class="flex items-center mb-3">
+                                <div class="p-2 bg-primary/10 rounded-lg mr-3">
+                                    <i class="fas fa-university text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-foreground" data-mock="true">Hassan II University</h3>
+                                    <p class="text-sm text-muted-foreground" data-mock="true">6 semesters</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-muted-foreground" data-mock="true">87 lessons</span>
+                                <i class="fas fa-chevron-right text-muted-foreground"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson View -->
+            <div id="lesson-view" class="p-6 hidden">
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="#dashboard" class="text-primary hover:text-primary/80">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#cities" class="text-primary hover:text-primary/80" data-mock="true">Casablanca</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#schools" class="text-primary hover:text-primary/80" data-mock="true">Hassan II University</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#semesters" class="text-primary hover:text-primary/80" data-mock="true">Semester 3</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#groups" class="text-primary hover:text-primary/80" data-mock="true">Group A</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <a href="#subjects" class="text-primary hover:text-primary/80" data-mock="true">Mathematics</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <span class="text-sm font-medium text-muted-foreground" data-mock="true">Advanced Calculus</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-foreground" data-bind="lesson.title" data-mock="true">Advanced Calculus - Derivatives</h1>
+                            <p class="text-muted-foreground mt-1">
+                                <span data-mock="true">Uploaded by Prof. Ahmed Benali</span> • 
+                                <span data-bind="lesson.uploadDate" data-mock="true">March 15, 2024</span>
+                            </p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <!-- Teacher can see edit/delete buttons for their own content -->
+                            <button class="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit
+                            </button>
+                            <button class="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors">
+                                <i class="fas fa-trash mr-2"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF Pages as Images -->
+                    <div class="space-y-4 mb-8">
+                        <!-- @MAP: pdfPages.map((page, index) => ( -->
+                        <!-- Mathematical formulas and equations on a whiteboard -->
+                        <div class="pdf-page bg-white p-4 rounded-lg border border-border shadow-sm">
+                            <img 
+                                src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&h=800" 
+                                alt="Page 1 of Advanced Calculus lesson" 
+                                class="w-full h-auto rounded-lg shadow-sm"
+                                data-bind="page.imageUrl"
+                                data-mock-image="true"
+                                data-implementation="PDF page converted to image"
+                            />
+                            <p class="text-center text-sm text-muted-foreground mt-2" data-mock="true">Page 1 of 8</p>
+                        </div>
+
+                        <!-- Calculus graphs and mathematical diagrams -->
+                        <div class="pdf-page bg-white p-4 rounded-lg border border-border shadow-sm">
+                            <img 
+                                src="https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&h=800" 
+                                alt="Page 2 of Advanced Calculus lesson" 
+                                class="w-full h-auto rounded-lg shadow-sm"
+                                data-bind="page.imageUrl"
+                                data-mock-image="true"
+                                data-implementation="PDF page converted to image"
+                            />
+                            <p class="text-center text-sm text-muted-foreground mt-2" data-mock="true">Page 2 of 8</p>
+                        </div>
+
+                        <!-- Mathematical equations and formulas written on paper -->
+                        <div class="pdf-page bg-white p-4 rounded-lg border border-border shadow-sm">
+                            <img 
+                                src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&h=800" 
+                                alt="Page 3 of Advanced Calculus lesson" 
+                                class="w-full h-auto rounded-lg shadow-sm"
+                                data-bind="page.imageUrl"
+                                data-mock-image="true"
+                                data-implementation="PDF page converted to image"
+                            />
+                            <p class="text-center text-sm text-muted-foreground mt-2" data-mock="true">Page 3 of 8</p>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+
+                    <!-- Download Button -->
+                    <div class="text-center">
+                        <button 
+                            class="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-lg font-medium"
+                            data-event="click:downloadPDF"
+                            data-implementation="Opens PDF in new tab using window.open(pdfUrl, '_blank')"
+                        >
+                            <i class="fas fa-download mr-3"></i>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Form (Teacher View) -->
+            <div id="upload-view" class="p-6 hidden">
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="#dashboard" class="text-primary hover:text-primary/80">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <span class="text-sm font-medium text-muted-foreground">Upload Lesson</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-6">Upload New Lesson</h2>
+                    
+                    <form class="space-y-6" data-event="submit:uploadLesson">
+                        <!-- Category Selection -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">City</label>
+                                <select class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                                    <option value="">Select City</option>
+                                    <option value="casablanca" data-mock="true">Casablanca</option>
+                                    <option value="rabat" data-mock="true">Rabat</option>
+                                    <option value="marrakech" data-mock="true">Marrakech</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">School</label>
+                                <select class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                                    <option value="">Select School</option>
+                                    <option value="hassan2" data-mock="true">Hassan II University</option>
+                                    <option value="mohamed5" data-mock="true">Mohamed V University</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Semester</label>
+                                <select class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                                    <option value="">Select Semester</option>
+                                    <option value="s1" data-mock="true">Semester 1</option>
+                                    <option value="s2" data-mock="true">Semester 2</option>
+                                    <option value="s3" data-mock="true">Semester 3</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Group</label>
+                                <select class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                                    <option value="">Select Group</option>
+                                    <option value="a" data-mock="true">Group A</option>
+                                    <option value="b" data-mock="true">Group B</option>
+                                    <option value="c" data-mock="true">Group C</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Subject</label>
+                                <select class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                                    <option value="">Select Subject</option>
+                                    <option value="math" data-mock="true">Mathematics</option>
+                                    <option value="physics" data-mock="true">Physics</option>
+                                    <option value="chemistry" data-mock="true">Chemistry</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Lesson Details -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Lesson Title</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter lesson title"
+                                    class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    data-bind="lesson.title"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Description (Optional)</label>
+                                <textarea 
+                                    rows="3" 
+                                    placeholder="Enter lesson description"
+                                    class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    data-bind="lesson.description"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">PDF File</label>
+                            <div class="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                                <div class="mb-4">
+                                    <i class="fas fa-file-pdf text-4xl text-muted-foreground"></i>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="text-sm text-muted-foreground">Drop your PDF file here or click to browse</p>
+                                    <p class="text-xs text-muted-foreground mt-1">Maximum file size: 50MB</p>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    accept=".pdf" 
+                                    class="hidden" 
+                                    id="pdf-upload"
+                                    data-implementation="Handle PDF upload and conversion to images"
+                                >
+                                <label 
+                                    for="pdf-upload" 
+                                    class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90 transition-colors"
+                                >
+                                    <i class="fas fa-upload mr-2"></i>
+                                    Choose File
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="flex justify-end space-x-4">
+                            <button 
+                                type="button" 
+                                class="px-6 py-2 border border-border text-muted-foreground rounded-lg hover:bg-muted transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="submit" 
+                                class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                                data-implementation="Should validate form before submission"
+                            >
+                                <i class="fas fa-upload mr-2"></i>
+                                Upload Lesson
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Category Management -->
+            <div id="admin-categories" class="p-6 hidden">
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="#dashboard" class="text-primary hover:text-primary/80">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-muted-foreground mx-2"></i>
+                                <span class="text-sm font-medium text-muted-foreground">Manage Categories</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-foreground">Category Management</h2>
+                        <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Category
+                        </button>
+                    </div>
+
+                    <!-- Category Tree -->
+                    <div class="space-y-4">
+                        <div class="border border-border rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-city text-primary mr-3"></i>
+                                    <span class="font-medium text-foreground" data-mock="true">Casablanca</span>
+                                    <span class="ml-2 text-sm text-muted-foreground" data-mock="true">(8 schools, 124 lessons)</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-muted-foreground hover:text-foreground">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-destructive hover:text-destructive/80">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="ml-6 mt-3 space-y-2">
+                                <div class="flex items-center justify-between bg-muted p-2 rounded">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-university text-secondary mr-3"></i>
+                                        <span class="text-sm" data-mock="true">Hassan II University</span>
+                                        <span class="ml-2 text-xs text-muted-foreground" data-mock="true">(6 semesters)</span>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="text-muted-foreground hover:text-foreground text-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-destructive hover:text-destructive/80 text-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    (function() {
+        // TODO: Implement navigation between views
+        // TODO: Implement role-based UI rendering
+        // TODO: Implement PDF upload and processing
+        // TODO: Implement category management
+        // TODO: Implement user authentication
+        // TODO: Implement file download functionality
+        
+        // Mock navigation for demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide all views except dashboard initially
+            const views = ['school-view', 'lesson-view', 'upload-view', 'admin-categories'];
+            views.forEach(view => {
+                document.getElementById(view).classList.add('hidden');
+            });
+            document.getElementById('dashboard-view').classList.remove('hidden');
+        });
+    })();
+    </script>
+</body>
+</html>
