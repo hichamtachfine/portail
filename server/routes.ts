@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./auth";
+import { setupAuth, isAuthenticated, isAdmin } from "./auth";
 import { insertCitySchema, insertSchoolSchema, insertSemesterSchema, insertGroupSchema, insertSubjectSchema, insertContentSchema, insertUserSchema, loginUserSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -281,6 +281,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user contents:", error);
       res.status(500).json({ message: "Failed to fetch contents" });
+    }
+  });
+
+  // Admin user management routes
+  app.get('/api/admin/users', isAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users.map(user => ({ ...user, password: undefined })));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.delete('/api/admin/users/:userId', isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      // Prevent admin from deleting themselves
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "Cannot delete yourself" });
+      }
+      
+      await storage.deleteUser(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
     }
   });
 

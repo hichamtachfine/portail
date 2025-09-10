@@ -11,6 +11,7 @@ import Browse from "@/pages/Browse";
 import LessonView from "@/pages/LessonView";
 import Upload from "@/pages/Upload";
 import AdminCategories from "@/pages/AdminCategories";
+import AdminUsers from "@/pages/AdminUsers";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,7 +34,7 @@ function Router() {
           {userTyped?.role === 'admin' && (
             <>
               <Route path="/admin/categories" component={AdminCategories} />
-              <Route path="/admin/users" component={() => <div>Admin User Management</div>} />
+              <Route path="/admin/users" component={AdminUsers} />
             </>
           )}
         </>

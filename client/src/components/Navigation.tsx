@@ -41,7 +41,10 @@ export default function Navigation() {
                 {userTyped && <RoleBadge role={userTyped.role} />}
                 <div className="flex items-center space-x-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={userTyped?.profileImageUrl || undefined} alt="User avatar" />
+                    <AvatarImage 
+                      src={userTyped?.profileImageUrl ? userTyped.profileImageUrl : undefined} 
+                      alt="User avatar" 
+                    />
                     <AvatarFallback>
                       {getInitials(userTyped?.firstName, userTyped?.lastName)}
                     </AvatarFallback>
