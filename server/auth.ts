@@ -81,13 +81,19 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  // Admin-only user creation endpoint
+  app.post("/api/admin/users", async (req, res, next) => {
     try {
+      // Check if user is authenticated and is admin
+      if (!req.isAuthenticated() || req.user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
       const { username, password, email, firstName, lastName, role } = req.body;
       
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(400).send("Username already exists");
+        return res.status(400).json({ message: "Username already exists" });
       }
 
       const user = await storage.createUser({
@@ -99,13 +105,10 @@ export function setupAuth(app: Express) {
         role: role || 'student',
       });
 
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json({ ...user, password: undefined });
-      });
+      res.status(201).json({ ...user, password: undefined });
     } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).send("Registration failed");
+      console.error("User creation error:", error);
+      res.status(500).json({ message: "User creation failed" });
     }
   });
 
@@ -131,4 +134,18 @@ export const isAuthenticated = (req: any, res: any, next: any) => {
     return next();
   }
   res.status(401).json({ message: "Unauthorized" });
+};
+
+export const isAdmin = (req: any, res: any, next: any) => {
+  if (req.isAuthenticated() && req.user?.role === 'admin') {
+    return next();
+  }
+  res.status(403).json({ message: "Admin access required" });
+};
+
+export const isTeacherOrAdmin = (req: any, res: any, next: any) => {
+  if (req.isAuthenticated() && (req.user?.role === 'teacher' || req.user?.role === 'admin')) {
+    return next();
+  }
+  res.status(403).json({ message: "Teacher or admin access required" });
 };

@@ -2,13 +2,19 @@ import { useAuth } from "@/hooks/useAuth";
 import RoleBadge from "./RoleBadge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GraduationCap, LogOut } from "lucide-react";
+import { GraduationCap, LogOut, LogIn } from "lucide-react";
+import { User } from "@shared/schema";
 
 export default function Navigation() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const userTyped = user as User | undefined;
 
   const handleLogout = () => {
     window.location.href = '/api/logout';
+  };
+
+  const handleLogin = () => {
+    window.location.href = '/api/login';
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -30,30 +36,43 @@ export default function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {user && <RoleBadge role={user.role} />}
-            <div className="flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.profileImageUrl || ''} alt="User avatar" />
-                <AvatarFallback>
-                  {getInitials(user?.firstName, user?.lastName)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium" data-testid="text-username">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName} ${user.lastName}`
-                  : user?.email || 'User'
-                }
-              </span>
+            {isAuthenticated ? (
+              <>
+                {userTyped && <RoleBadge role={userTyped.role} />}
+                <div className="flex items-center space-x-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={userTyped?.profileImageUrl || undefined} alt="User avatar" />
+                    <AvatarFallback>
+                      {getInitials(userTyped?.firstName, userTyped?.lastName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium" data-testid="text-username">
+                    {userTyped?.firstName && userTyped?.lastName 
+                      ? `${userTyped.firstName} ${userTyped.lastName}`
+                      : userTyped?.email || 'User'
+                    }
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleLogout}
+                    className="text-muted-foreground hover:text-foreground"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            ) : (
               <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleLogout}
-                className="text-muted-foreground hover:text-foreground"
-                data-testid="button-logout"
+                onClick={handleLogin}
+                className="bg-primary hover:bg-primary/90"
+                data-testid="button-login"
               >
-                <LogOut className="h-4 w-4" />
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
               </Button>
-            </div>
+            )}
           </div>
         </div>
       </div>

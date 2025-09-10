@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { User } from "@shared/schema";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Browse from "@/pages/Browse";
@@ -13,21 +14,31 @@ import AdminCategories from "@/pages/AdminCategories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const userTyped = user as User | undefined;
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      {/* Public routes - accessible to everyone */}
+      <Route path="/" component={isAuthenticated ? Home : Landing} />
+      <Route path="/browse/*" component={Browse} />
+      <Route path="/lesson/:id" component={LessonView} />
+      
+      {/* Protected routes - require authentication */}
+      {isAuthenticated && (
         <>
-          <Route path="/" component={Home} />
-          <Route path="/browse/*" component={Browse} />
-          <Route path="/lesson/:id" component={LessonView} />
-          <Route path="/upload" component={Upload} />
-          <Route path="/admin/categories" component={AdminCategories} />
+          {(userTyped?.role === 'teacher' || userTyped?.role === 'admin') && (
+            <Route path="/upload" component={Upload} />
+          )}
+          {userTyped?.role === 'admin' && (
+            <>
+              <Route path="/admin/categories" component={AdminCategories} />
+              <Route path="/admin/users" component={() => <div>Admin User Management</div>} />
+            </>
+          )}
         </>
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );
