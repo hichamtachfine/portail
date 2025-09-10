@@ -25,7 +25,7 @@ import {
   type InsertContentPage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -200,22 +200,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSchoolBySlug(cityId: number, slug: string): Promise<School | undefined> {
-    const [school] = await db.select().from(schools).where(eq(schools.cityId, cityId)).where(eq(schools.slug, slug));
+    const [school] = await db.select().from(schools).where(and(eq(schools.cityId, cityId), eq(schools.slug, slug)));
     return school;
   }
 
   async getSemesterBySlug(schoolId: number, slug: string): Promise<Semester | undefined> {
-    const [semester] = await db.select().from(semesters).where(eq(semesters.schoolId, schoolId)).where(eq(semesters.slug, slug));
+    const [semester] = await db.select().from(semesters).where(and(eq(semesters.schoolId, schoolId), eq(semesters.slug, slug)));
     return semester;
   }
 
   async getGroupBySlug(semesterId: number, slug: string): Promise<Group | undefined> {
-    const [group] = await db.select().from(groups).where(eq(groups.semesterId, semesterId)).where(eq(groups.slug, slug));
+    const [group] = await db.select().from(groups).where(and(eq(groups.semesterId, semesterId), eq(groups.slug, slug)));
     return group;
   }
 
   async getSubjectBySlug(groupId: number, slug: string): Promise<Subject | undefined> {
-    const [subject] = await db.select().from(subjects).where(eq(subjects.groupId, groupId)).where(eq(subjects.slug, slug));
+    const [subject] = await db.select().from(subjects).where(and(eq(subjects.groupId, groupId), eq(subjects.slug, slug)));
     return subject;
   }
 }
