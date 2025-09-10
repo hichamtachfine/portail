@@ -30,7 +30,9 @@ export const userRoleEnum = pgEnum('user_role', ['student', 'teacher', 'admin'])
 // User storage table.
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username", { length: 50 }).unique(),
   email: varchar("email").unique(),
+  password: varchar("password"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -210,8 +212,22 @@ export const insertContentPageSchema = createInsertSchema(contentPages).pick({
   imagePath: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  email: true,
+  password: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+});
+
+export const loginUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
 // Types
-export type UpsertUser = typeof users.$inferInsert;
+export type InsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type City = typeof cities.$inferSelect;
 export type School = typeof schools.$inferSelect;
@@ -228,3 +244,4 @@ export type InsertGroup = z.infer<typeof insertGroupSchema>;
 export type InsertSubject = z.infer<typeof insertSubjectSchema>;
 export type InsertContent = z.infer<typeof insertContentSchema>;
 export type InsertContentPage = z.infer<typeof insertContentPageSchema>;
+export type LoginUser = z.infer<typeof loginUserSchema>;

@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertCitySchema, insertSchoolSchema, insertSemesterSchema, insertGroupSchema, insertSubjectSchema, insertContentSchema } from "@shared/schema";
+import { setupAuth, isAuthenticated } from "./auth";
+import { insertCitySchema, insertSchoolSchema, insertSemesterSchema, insertGroupSchema, insertSubjectSchema, insertContentSchema, insertUserSchema, loginUserSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -29,14 +29,13 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const user = await storage.getUser(req.user.id);
+      res.json({ ...user, password: undefined });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -127,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin-only category management routes
   app.post('/api/cities', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -143,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/schools', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -159,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/semesters', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -175,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/groups', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -191,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/subjects', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -208,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Content upload route (teachers and admins)
   app.post('/api/contents', isAuthenticated, upload.single('pdf'), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       if (user?.role === 'student') {
         return res.status(403).json({ message: "Students cannot upload content" });
       }
@@ -225,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const content = await storage.createContent({
         ...contentData,
-        uploadedBy: req.user.claims.sub,
+        uploadedBy: req.user.id,
       });
 
       // TODO: Implement PDF to image conversion here
@@ -246,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete content route
   app.delete('/api/contents/:contentId', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user.id);
       const contentId = parseInt(req.params.contentId);
       const content = await storage.getContentById(contentId);
 
@@ -255,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Teachers can only delete their own content, admins can delete any content
-      if (user?.role === 'teacher' && content.uploadedBy !== req.user.claims.sub) {
+      if (user?.role === 'teacher' && content.uploadedBy !== req.user.id) {
         return res.status(403).json({ message: "You can only delete your own content" });
       }
 
@@ -277,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's own content (for teachers)
   app.get('/api/my-contents', isAuthenticated, async (req: any, res) => {
     try {
-      const contents = await storage.getContentsByUser(req.user.claims.sub);
+      const contents = await storage.getContentsByUser(req.user.id);
       res.json(contents);
     } catch (error) {
       console.error("Error fetching user contents:", error);
